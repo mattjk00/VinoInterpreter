@@ -22,10 +22,16 @@ class Symbol:
         self.is_raw = raw
     
     def __str__(self):
-        return str(self.value)
+        return sym_to_str(self.value)
     
     def __repr__(self):
         return str(self)
 
     def __eq__(self, other):
         return self.value == other.value and self.is_raw == other.is_raw
+
+def sym_to_str(num):
+    if num in symdict:
+        return symdict[num]
+    else:
+        return num

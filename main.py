@@ -26,6 +26,7 @@ class Program:
         self.done = False
         self.bc = 0
         self.fn_flag = False
+        self.scope = ['module']
     
     def accept_ident(self): 
         t = self.sym().value in self.robot.vartable  
@@ -92,57 +93,58 @@ class Program:
 
     def block(self):
         self.bc += 1
-        #print("\nBlock ", self.bc)
+        print("\nBlock ", self.bc, "- Scope:", self.scope[-1])
+
         
+        self.proc_block()
+        if not self.let_block():
+            self.statement()
+
+    def let_block(self):    
         if self.accept(LET):
             self.stack.clear()
             self.expect(ANY)
             if self.accept(EQ):
                 self.expect(ANY)
                 self.expect(ENDL)
-                self.robot.vardec(self.stack)
+                self.robot.vardec(self.stack, self.scope[-1])
                 self.stack.clear()
+                return True
             else:
                 self.expect(ENDL)
+                return True
             #self.block()
+        return False
+    
+    def proc_block(self):
         while self.accept(PROC):
-            print("[Start] Proccess")
-            #if self.fn_flag == False:
-                #self.fn_flag = True
+            fn_name = self.sym().value
             self.expect(ANY)
             self.expect(LP)
             self.expect(RP)
             self.expect(LCB)
+
+            self.scope.append(fn_name)
             
-            self.block()
-            self.expect(RCB)
-            print("[End] Proccess")
-            #else:
-                #self.error("Cannot declare function within function.")
-        #if self.fn_flag:
+            while not self.sym().value == RCB:
+                self.block()
             
-            #self.expect(RCB)
-            #self.fn_flag = False
-        #else:
-            #pass    
-        self.statement()
-            #else:
-                #self.error("Cannot declare function within function.")
-        
-        
+            self.scope.pop()
     
     def statement(self):
         
         if self.accept_ident():
+            
             self.expect(EQ)
             self.expression()
             self.expect(ENDL)
+
             #self.robot.vardec(self.stack)
             #self.stack.clear()
         elif self.accept(ENDL) or self.accept(RCB):
             pass
         else:
-            self.error("Syntax Error -> " + str(self.sym()))
+            self.error("Statement Syntax Error -> " + str(self.sym()))
             self.nextsym()
     
     def expression(self):
@@ -178,7 +180,10 @@ class Program:
             self.nextsym()
     
     def parse(self):
-        self.block()
+        while not self.done:
+            self.block()
+        print(list(self.robot.vartable.values()))
+        
 
 
 
