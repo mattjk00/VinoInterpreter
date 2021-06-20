@@ -13,7 +13,12 @@ PLUS = 11
 MINUS = 12
 MULT = 13
 DIV = 14
-symdict = {LET:"let", IDENT:"?", ENDL:";", EQ:"=", ANY:"A", PROC:"fn", COLON:":", LCB:"{", RCB:"}", LP:"(", RP:")", PLUS:"+", MINUS:"-", MULT:"*", DIV:"/"}
+IF = 15
+GTHAN = 16
+LTHAN = 17
+EQUAL = 18
+symdict = {LET:"let", IDENT:"?", ENDL:";", EQ:"=", ANY:"A", PROC:"fn", COLON:":", LCB:"{", RCB:"}", LP:"(", RP:")", 
+PLUS:"+", MINUS:"-", MULT:"*", DIV:"/", IF:"if", GTHAN:">", LTHAN:"<", EQUAL:"=="}
 inv_symdict = {v:k for k, v in symdict.items()}
 
 class Symbol:
