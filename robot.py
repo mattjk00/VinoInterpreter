@@ -1,3 +1,5 @@
+from symbol import sym_to_str
+
 class Variable:
     def __init__(self, name, addr, scope):
         self.name = name
@@ -25,7 +27,10 @@ class Robot:
 
     def varassign(self, stack):
         name = stack[0]
-        print(stack)        
+        symexpression = stack[2:-1]
+        expression = list(map(lambda x: sym_to_str(x), symexpression))
+        ordered_exp = self.order_expression(expression)
+        print(ordered_exp)        
 
     def order_expression(self, ex):
         """

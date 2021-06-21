@@ -280,14 +280,14 @@ class Program:
         
 def main():
     p = Program()
-    #p.load_symbols("test.vn")
-    #p.parse()
-    #print(p.robot.output())
+    p.load_symbols("test.vn")
+    p.parse()
+    print(p.robot.output())
 
     #exp = ['3', '+', '4', '*', '2', '/', '(', '1', '-', '5', ')', '^', '2', '^', '3']
-    exp = ['5', '+', '2','*','(','3','-','4',')']
+    #exp = ['5', '+', '2','*','(','3','-','4',')']
     #print(exp)
-    p.robot.order_expression(exp)
+    #p.robot.order_expression(exp)
 
 
 if __name__ == '__main__':
