@@ -1,6 +1,5 @@
 from enum import Enum
 import re
-import symbol
 from robot import Robot
 from symbol import *
 
@@ -192,8 +191,8 @@ class Program:
             self.expression()
             self.expect(ENDL)
 
-            #self.robot.vardec(self.stack)
-            #self.stack.clear()
+            self.robot.varassign(self.stack)
+            self.stack.clear()
         # If statement
         elif self.accept(IF):
             self.condition()
@@ -281,9 +280,14 @@ class Program:
         
 def main():
     p = Program()
-    p.load_symbols("test.vn")
-    p.parse()
-    print(p.robot.output())
+    #p.load_symbols("test.vn")
+    #p.parse()
+    #print(p.robot.output())
+
+    #exp = ['3', '+', '4', '*', '2', '/', '(', '1', '-', '5', ')', '^', '2', '^', '3']
+    exp = ['5', '+', '2','*','(','3','-','4',')']
+    #print(exp)
+    p.robot.order_expression(exp)
 
 
 if __name__ == '__main__':
