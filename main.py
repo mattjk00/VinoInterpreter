@@ -198,7 +198,12 @@ class Program:
             self.condition()
             self.expect(LCB)
             self.block()
+
+            self.robot.ifstatement(self.stack)
+            self.stack.clear()
             self.expect(RCB)
+
+            
 
             
         elif self.accept(ENDL) or self.accept(RCB):
@@ -279,10 +284,23 @@ class Program:
         print(list(self.robot.vartable.values()))
         
 def main():
+    import sys
     p = Program()
-    p.load_symbols("test.vn")
+
+    n = len(sys.argv)
+    out = "test.vino"
+    if n > 0:
+        p.load_symbols(sys.argv[1])
+        out = sys.argv[1].split('.')[0] + ".vino"
+    else:
+        p.load_symbols("test.vn")
+    
+    
     p.parse()
-    print(p.robot.output())
+    print(list(map(lambda x: hex(x), p.robot.output())))
+    bytes = p.robot.output_as_bytes()
+    print(list(map(lambda x: hex(x), bytes)))
+    p.robot.write_to_file(out, bytes)
 
     #exp = ['3', '+', '4', '*', '2', '/', '(', '1', '-', '5', ')', '^', '2', '^', '3']
     #exp = ['5', '+', '2','*','(','3','-','4',')']
