@@ -1,4 +1,7 @@
 fn main() {
     let a = 6;
     a = 5 + (2 * 2) + a;
+    if a+1 > 0+1 {
+        let c = 0
+    }
 }

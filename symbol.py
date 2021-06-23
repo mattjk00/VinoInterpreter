@@ -34,10 +34,13 @@ class Symbol:
 
     def __eq__(self, other):
         return self.value == other.value and self.is_raw == other.is_raw
+    
+    def is_comparison(self):
+        return self.value == GTHAN or self.value == LTHAN or self.value == EQUAL
 
 def sym_to_str(num):
     if isinstance(num, Symbol) and num.value in symdict:
-        return symdict[num.value]
+        return "S|" + symdict[num.value]
     else:
         if isinstance(num, str):
             return num

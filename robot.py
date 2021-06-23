@@ -1,4 +1,5 @@
-from symbol import sym_to_str
+from re import split
+from symbol import sym_to_str, Symbol
 
 class Variable:
     def __init__(self, name, addr, scope):
@@ -43,6 +44,31 @@ class Robot:
     
     def ifstatement(self, stack):
         print("IF: ", stack)
+        split_index = -1
+        compare = ''
+        for i in range(len(stack)):
+            
+            if isinstance(stack[i], str) and (stack[i] == '>' or stack[i] == '<' or stack[i] == '=='):
+                split_index = i
+                compare = stack[i]
+                break
+        first_exp = stack[1:split_index]
+        second_exp = stack[split_index+1:-2]
+        
+        ofirst = self.order_expression(first_exp)
+        self.evaluate_expression(ofirst)
+        self.bytecode.append(0x2000_0000) # push first expression
+        osecond = self.order_expression(second_exp)
+        self.evaluate_expression(osecond)
+        
+        self.bytecode.append(0x5100_0000) # sub expressions
+        
+        if compare == '>':
+            self.bytecode.append(0x3300_0000)
+        elif compare == '<':
+            self.bytecode.append(0x3200_0000)
+        else:
+            self.bytecode.append(0x3100_0000)
 
     def evaluate_expression(self, ex):
         stack = []
