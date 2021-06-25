@@ -16,7 +16,8 @@ class Robot:
         self.memcode = []
         self.vartable = {}
 
-        self.operators = ['+', '-', '*', '/', '^']
+        self.operators = ['+', '-', '*', '/', '^', '<', '>', '==']
+        self.jump_flags = []
 
     def vardec(self, stack, scope):
         name = stack[0]
@@ -34,17 +35,35 @@ class Robot:
         varsym = stack[0]
 
         var = self.find_variable(varsym.value)
-        symexpression = stack[2:-1]
+        symexpression = stack[2:]
+        if symexpression[-1] == ';':
+            symexpression.pop()
         expression = list(map(lambda x: sym_to_str(x), symexpression))
         ordered_exp = self.order_expression(expression)
         print(ordered_exp) 
 
         self.evaluate_expression(ordered_exp)
         self.bytecode.append(0x2400_0000 + var.address)
+
+    def jump_here(self):
+        '''
+        Used to keep track of where the program should jump to in case of if statements
+        '''
+        jump_to_loc = len(self.bytecode)-1
+        jump_word_loc = self.jump_flags.pop()
+        self.bytecode[jump_word_loc] = self.bytecode[jump_word_loc] + jump_to_loc
     
     def ifstatement(self, stack):
         print("IF: ", stack)
-        split_index = -1
+        exp = stack[1:-1]
+        print(exp)
+        orderedexp = self.order_expression(exp)
+        self.evaluate_expression(orderedexp)
+
+        self.bytecode.append(0x3100_0000) # jump zero
+        self.jump_flags.append(len(self.bytecode)-1) # keeping track of where to jump to later
+
+        '''split_index = -1
         compare = ''
         for i in range(len(stack)):
             
@@ -68,9 +87,12 @@ class Robot:
         elif compare == '<':
             self.bytecode.append(0x3200_0000)
         else:
-            self.bytecode.append(0x3100_0000)
+            self.bytecode.append(0x3100_0000)'''
 
     def evaluate_expression(self, ex):
+        if len(ex) == 0:
+            return
+
         stack = []
 
         for token in ex:
@@ -92,14 +114,14 @@ class Robot:
             self.bytecode.append(0x2300_0000 + op2var.address)
             self.bytecode.append(0x2000_0000)
         elif op2 != 'stack':
-            self.bytecode.append(0x1000_0000 + int(op2))
+            self.bytecode.append(0x1000_0000 + self.to_int(op2))
             self.bytecode.append(0x2000_0000)
 
         op1var = self.find_variable(op1)
         if op1var != None:
             self.bytecode.append(0x2300_0000 + op1var.address)
         elif op1 != 'stack':
-            self.bytecode.append(0x1000_0000 + int(op1))
+            self.bytecode.append(0x1000_0000 + self.to_int(op1))
         elif op1 == 'stack':
             self.bytecode.append(0x2100_0000)
         
@@ -111,11 +133,15 @@ class Robot:
             self.bytecode.append(0x5200_0000)
         elif operator == '/':
             self.bytecode.append(0x5300_0000)
+        elif operator == '==':
+            self.bytecode.append(0x5400_0000)
         self.bytecode.append(0x2000_0000)
 
         return 'stack'
     
     def find_variable(self, name):
+        if isinstance(name, Symbol):
+            name = name.value
         try:
             var = self.vartable[name]
             return var
@@ -161,6 +187,11 @@ class Robot:
             output.append(op)
         return output
 
+    def to_int(self, sym):
+        if isinstance(sym, Symbol):
+            return int(sym.value)
+        else:
+            return int(sym)
 
     def output(self):
         return self.bytecode + [0xF000_0000, 0xFF000000] + self.memcode

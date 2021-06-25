@@ -188,7 +188,7 @@ class Program:
         if self.accept_ident():
             
             self.expect(EQ)
-            self.expression()
+            self.condition()
             self.expect(ENDL)
 
             self.robot.varassign(self.stack)
@@ -197,12 +197,16 @@ class Program:
         elif self.accept(IF):
             self.condition()
             self.expect(LCB)
-            self.block()
 
             self.robot.ifstatement(self.stack)
             self.stack.clear()
+
+            self.block()
+
+            
             self.expect(RCB)
 
+            self.robot.jump_here()    
             
 
             
@@ -249,6 +253,7 @@ class Program:
             self.factor()
     
     def factor(self):
+        
         """
         Tries to parse a factor for an expression.
         """
@@ -289,7 +294,7 @@ def main():
 
     n = len(sys.argv)
     out = "test.vino"
-    if n > 0:
+    if n > 1:
         p.load_symbols(sys.argv[1])
         out = sys.argv[1].split('.')[0] + ".vino"
     else:

@@ -33,6 +33,8 @@ class Symbol:
         return sym_to_str(self)
 
     def __eq__(self, other):
+        if isinstance(other, Symbol) == False:
+            return False
         return self.value == other.value and self.is_raw == other.is_raw
     
     def is_comparison(self):
