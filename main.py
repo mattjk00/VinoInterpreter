@@ -1,4 +1,3 @@
-from enum import Enum
 import re
 from robot import Robot
 from symbol import *
@@ -188,7 +187,7 @@ class Program:
         if self.accept_ident():
             
             self.expect(EQ)
-            self.condition()
+            self.expression()
             self.expect(ENDL)
 
             self.robot.varassign(self.stack)
@@ -216,17 +215,21 @@ class Program:
             self.error("Statement Syntax Error -> " + str(self.sym()))
             self.nextsym(push=False)
     
-    def condition(self):
+    def condition(self, call_expression=True):
         """
         Tries to parse a conditional statement
+        param: call_expression - Set to false if you do not want this condition call to also call expression before parsing.
         """
-        self.expression()
+        if call_expression == True:
+            self.expression()
         s = self.sym().value
         if s == EQUAL or s == GTHAN or s == LTHAN:
             self.nextsym(push=s)
             self.expression()
         else:
-            self.error("Invalid Operator in If statement")
+            if call_expression == False:
+                return
+            self.error("Invalid Operator in Conditional Statement.")
             self.nextsym(push=False)
     
     def expression(self):
@@ -235,12 +238,15 @@ class Program:
         """
         if self.sym().value == PLUS or self.sym().value == MINUS: 
             self.nextsym()
-            
+
         self.term()
 
         while self.sym().value == PLUS or self.sym().value == MINUS:
             self.nextsym()
             self.term()
+
+        # Check to see if the expression is actually a conditional statement.
+        self.condition(call_expression=False)
     
     def term(self):
         """
