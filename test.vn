@@ -1,6 +1,9 @@
 fn main() {
-    let a = 6;
+    let a = 0;
+    let b = 2;
     
-    a = (a - 6);
-    a = (a == 0) + 5;
+    while (a < 10) {
+        a = a + 1;
+        a = a + 1;
+    }
 }

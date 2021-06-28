@@ -18,6 +18,7 @@ class Robot:
 
         self.operators = ['+', '-', '*', '/', '^', '<', '>', '==']
         self.jump_flags = []
+        self.loop_starts = []
 
     def vardec(self, stack, scope):
         name = stack[0]
@@ -45,13 +46,17 @@ class Robot:
         self.evaluate_expression(ordered_exp)
         self.bytecode.append(0x2400_0000 + var.address)
 
-    def jump_here(self):
+    def jump_here(self, offset=0):
         '''
         Used to keep track of where the program should jump to in case of if statements
         '''
         jump_to_loc = len(self.bytecode)-1
         jump_word_loc = self.jump_flags.pop()
-        self.bytecode[jump_word_loc] = self.bytecode[jump_word_loc] + jump_to_loc
+        self.bytecode[jump_word_loc] = self.bytecode[jump_word_loc] + jump_to_loc + offset
+    
+    def end_while(self):
+        self.bytecode.append(0x3000_0000 + self.loop_starts.pop())
+        self.jump_here(offset=1)
     
     def ifstatement(self, stack):
         print("IF: ", stack)
@@ -62,32 +67,20 @@ class Robot:
 
         self.bytecode.append(0x3100_0000) # jump zero
         self.jump_flags.append(len(self.bytecode)-1) # keeping track of where to jump to later
+    
+    def while_loop(self, stack):
+        print("WHILE", stack)
 
-        '''split_index = -1
-        compare = ''
-        for i in range(len(stack)):
-            
-            if isinstance(stack[i], str) and (stack[i] == '>' or stack[i] == '<' or stack[i] == '=='):
-                split_index = i
-                compare = stack[i]
-                break
-        first_exp = stack[1:split_index]
-        second_exp = stack[split_index+1:-2]
+        while_start = len(self.bytecode)
+        self.loop_starts.append(while_start)
+
+        exp = stack[1:-1]
+        orderedexp = self.order_expression(exp)
+        self.evaluate_expression(orderedexp)
+
         
-        ofirst = self.order_expression(first_exp)
-        self.evaluate_expression(ofirst)
-        self.bytecode.append(0x2000_0000) # push first expression
-        osecond = self.order_expression(second_exp)
-        self.evaluate_expression(osecond)
-        
-        self.bytecode.append(0x5100_0000) # sub expressions
-        
-        if compare == '>':
-            self.bytecode.append(0x3300_0000)
-        elif compare == '<':
-            self.bytecode.append(0x3200_0000)
-        else:
-            self.bytecode.append(0x3100_0000)'''
+        self.bytecode.append(0x3100_0000) # jump zero
+        self.jump_flags.append(len(self.bytecode)-1) # keeping track of where to jump to later
 
     def evaluate_expression(self, ex):
         if len(ex) == 0:
@@ -135,6 +128,10 @@ class Robot:
             self.bytecode.append(0x5300_0000)
         elif operator == '==':
             self.bytecode.append(0x5400_0000)
+        elif operator == '<':
+            self.bytecode.append(0x5500_0000)
+        elif operator == '>':
+            self.bytecode.append(0x5600_0000)
         self.bytecode.append(0x2000_0000)
 
         return 'stack'

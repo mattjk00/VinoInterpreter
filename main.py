@@ -1,6 +1,6 @@
 import re
 from robot import Robot
-from symbol import *
+from symbol import * 
 
 # Generates a Regex String for matching the language tokens
 def symbol_string():
@@ -70,7 +70,7 @@ class Program:
         s = f.read()
         s = " ".join(s.split())
         print(s)
-        syms = re.split(r"(\bif\b|\blet\b|;|\)|\(|\{|}|\bfn\b|\+|-|/|\*|>|<|(?<![!=])[!=]=(?!=)|=)", s)
+        syms = re.split(r"(\bwhile\b|\bif\b|\blet\b|;|\)|\(|\{|}|\bfn\b|\+|-|/|\*|>|<|(?<![!=])[!=]=(?!=)|=)", s)
         syms = list(filter(lambda x:x != "" and x != " ", syms))
         syms = list(map(lambda x: "".join(x.split()), syms))
         syms = list(map(lambda x: Symbol(inv_symdict[x]) if x in inv_symdict else Symbol(x, raw=True), syms))
@@ -201,13 +201,21 @@ class Program:
             self.stack.clear()
 
             self.block()
-
             
             self.expect(RCB)
 
             self.robot.jump_here()    
-            
+        elif self.accept(WHILE):
+            self.condition()
+            self.expect(LCB)
 
+            self.robot.while_loop(self.stack)
+            self.stack.clear()
+
+            self.block()
+
+            self.expect(RCB)    
+            self.robot.end_while() 
             
         elif self.accept(ENDL) or self.accept(RCB):
             pass
@@ -227,7 +235,7 @@ class Program:
             self.nextsym(push=s)
             self.expression()
         else:
-            if call_expression == False:
+            if call_expression == False or s == LCB or s == ENDL:
                 return
             self.error("Invalid Operator in Conditional Statement.")
             self.nextsym(push=False)
