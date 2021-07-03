@@ -212,7 +212,8 @@ class Program:
             self.robot.while_loop(self.stack)
             self.stack.clear()
 
-            self.block()
+            while self.sym().value != RCB:
+                self.block()
 
             self.expect(RCB)    
             self.robot.end_while() 

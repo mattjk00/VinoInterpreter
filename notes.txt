@@ -1,0 +1,3 @@
+---- IFS & WHILES ----
+- Only single blocks execute inside ifs and while blocks
+    - if there are two blocks in an if statement, the second block will execute after the if statement
